@@ -6,7 +6,13 @@ import 'package:provider/provider.dart';
 
 class GiphyTabBar extends StatefulWidget {
   final TabController tabController;
-  const GiphyTabBar({Key? key, required this.tabController}) : super(key: key);
+  final List<String> tabs;
+
+  const GiphyTabBar({
+    Key? key,
+    required this.tabController,
+    required this.tabs,
+  }) : super(key: key);
 
   @override
   _GiphyTabBarState createState() => _GiphyTabBarState();
@@ -15,18 +21,13 @@ class GiphyTabBar extends StatefulWidget {
 class _GiphyTabBarState extends State<GiphyTabBar> {
   late TabProvider _tabProvider;
   late List<Tab> _tabs;
-  
 
   @override
   void initState() {
     super.initState();
 
-    
-
     // TabProvider
     _tabProvider = Provider.of<TabProvider>(context, listen: false);
-
-    
 
     //  Listen Tab Controller
     widget.tabController.addListener(() {
@@ -38,21 +39,30 @@ class _GiphyTabBarState extends State<GiphyTabBar> {
     });
   }
 
+  String _getLocalization(BuildContext context, String tab) {
+    final l = GiphyGetUILocalizations.labelsOf(context);
+
+    if (tab == GiphyType.emoji) {
+      return l.emojisLabel;
+    }
+
+    if (tab == GiphyType.stickers) {
+      return l.stickersLabel;
+    }
+
+    return l.gifsLabel;
+  }
+
   @override
   void didChangeDependencies() {
     // Set TabList
-    final l = GiphyGetUILocalizations.labelsOf(context);
-    _tabs = [
-      Tab(
-        text: l.gifsLabel,
-      ),
-      Tab(
-        text: l.stickersLabel,
-      ),
-      Tab(
-        text: l.emojisLabel,
-      ),
-    ];
+    _tabs = widget.tabs
+        .map(
+          (tab) => Tab(
+            text: _getLocalization(context, tab),
+          ),
+        )
+        .toList();
     super.didChangeDependencies();
   }
 
@@ -71,7 +81,8 @@ class _GiphyTabBarState extends State<GiphyTabBar> {
       unselectedLabelColor: Theme.of(context).brightness == Brightness.light
           ? Colors.black54
           : Colors.white54,
-      labelColor: _tabProvider.tabColor ?? Theme.of(context).colorScheme.secondary,
+      labelColor:
+          _tabProvider.tabColor ?? Theme.of(context).colorScheme.secondary,
       indicatorColor: Colors.transparent,
       indicatorSize: TabBarIndicatorSize.label,
       controller: widget.tabController,

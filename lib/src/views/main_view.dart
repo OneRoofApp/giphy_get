@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:giphy_get/giphy_get.dart';
 import 'package:giphy_get/src/providers/sheet_provider.dart';
 import 'package:giphy_get/src/views/appbar/searchappbar.dart';
 import 'package:giphy_get/src/views/tab/giphy_tab_bar.dart';
@@ -8,7 +9,20 @@ import 'package:giphy_get/src/views/tab/giphy_tab_view.dart';
 import 'package:provider/provider.dart';
 
 class MainView extends StatefulWidget {
-  MainView({Key? key}) : super(key: key);
+  final List<String> tabs;
+  final bool showPoweredBy;
+
+  MainView({
+    Key? key,
+    required this.tabs,
+    required this.showPoweredBy,
+  })  : assert(tabs.isNotEmpty, 'Tabs must not be null or empty'),
+        assert(() {
+          final common = allGiphyTypes.toSet()..addAll(tabs);
+
+          return common.length <= allGiphyTypes.length;
+        }(), 'Tabs must have a valid value, check [allGiphyTypes]'),
+        super(key: key);
 
   @override
   _MainViewState createState() => _MainViewState();
@@ -29,7 +43,7 @@ class _MainViewState extends State<MainView>
   void initState() {
     super.initState();
 
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: widget.tabs.length, vsync: this);
   }
 
   @override
@@ -49,6 +63,8 @@ class _MainViewState extends State<MainView>
     return _draggableScrollableSheet();
   }
 
+  bool get _hasTabs => widget.tabs.length > 1;
+
   Widget _draggableScrollableSheet() => DraggableScrollableSheet(
       expand: _sheetProvider.isExpanded,
       minChildSize: SheetProvider.minExtent,
@@ -65,16 +81,19 @@ class _MainViewState extends State<MainView>
         mainAxisSize: MainAxisSize.min,
         children: [
           GiphyTabTop(),
-          GiphyTabBar(
-            tabController: _tabController,
-          ),
+          if (_hasTabs)
+            GiphyTabBar(
+              tabs: widget.tabs,
+              tabController: _tabController,
+            ),
           SearchAppBar(scrollController: this._scrollController),
           Expanded(
               child: GiphyTabView(
+            tabs: widget.tabs,
             tabController: _tabController,
             scrollController: this._scrollController,
           )),
-          GiphyTabBottom()
+          if (widget.showPoweredBy) GiphyTabBottom(),
         ],
       );
 }

@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:giphy_get/src/client/models/gif.dart';
 import 'package:giphy_get/src/client/models/languages.dart';
 import 'package:giphy_get/src/client/models/rating.dart';
+import 'package:giphy_get/src/client/models/type.dart';
 import 'package:giphy_get/src/providers/app_bar_provider.dart';
 import 'package:giphy_get/src/providers/sheet_provider.dart';
-import 'package:giphy_get/src/views/main_view.dart';
 import 'package:giphy_get/src/providers/tab_provider.dart';
+import 'package:giphy_get/src/views/main_view.dart';
 import 'package:provider/provider.dart';
 
 // Giphy Client Export
@@ -19,10 +20,12 @@ export 'package:giphy_get/src/client/models/image.dart';
 export 'package:giphy_get/src/client/models/images.dart';
 export 'package:giphy_get/src/client/models/languages.dart';
 export 'package:giphy_get/src/client/models/rating.dart';
-export 'package:giphy_get/src/client/models/user.dart';
 export 'package:giphy_get/src/client/models/type.dart';
-export 'package:giphy_get/src/widgets/giphy_gif.widget.dart';
+export 'package:giphy_get/src/client/models/user.dart';
 export 'package:giphy_get/src/widgets/giphy_get.widget.dart';
+export 'package:giphy_get/src/widgets/giphy_gif.widget.dart';
+export 'package:giphy_get/src/theme/search_app_bar_style.dart';
+export 'package:giphy_get/src/theme/giphy_tab_top_style.dart';
 
 class GiphyGet {
   // Show Bottom Sheet
@@ -36,33 +39,47 @@ class GiphyGet {
     String queryText = "",
     bool modal = true,
     Color? tabColor,
+    bool showPoweredBy = true,
+    List<String> tabs = const [
+      GiphyType.gifs,
+      GiphyType.stickers,
+      GiphyType.emoji,
+    ],
   }) {
     if (apiKey == "") {
       throw Exception("apiKey must be not null or not empty");
     }
 
     return showModalBottomSheet<GiphyGif>(
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))),
-        isScrollControlled: true,
-        context: context,
-        builder: (ctx) => MultiProvider(providers: [
-              ChangeNotifierProvider(
-                create: (ctx) => AppBarProvider(queryText = queryText),
-              ),
-              ChangeNotifierProvider(
-                create: (ctx) => SheetProvider(),
-              ),
-              ChangeNotifierProvider(
-                  create: (ctx) => TabProvider(
-                      apiKey: apiKey,
-                      randomID: randomID,
-                      tabColor:
-                          tabColor ?? Theme.of(context).colorScheme.secondary,
-                      searchText: searchText,
-                      rating: rating,
-                      lang: lang))
-            ], child: SafeArea(child: MainView())));
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))),
+      isScrollControlled: true,
+      context: context,
+      builder: (ctx) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(
+            create: (ctx) => AppBarProvider(queryText = queryText),
+          ),
+          ChangeNotifierProvider(
+            create: (ctx) => SheetProvider(),
+          ),
+          ChangeNotifierProvider(
+              create: (ctx) => TabProvider(
+                  apiKey: apiKey,
+                  randomID: randomID,
+                  tabColor: tabColor ?? Theme.of(context).colorScheme.secondary,
+                  searchText: searchText,
+                  rating: rating,
+                  lang: lang))
+        ],
+        child: SafeArea(
+          child: MainView(
+            tabs: tabs,
+            showPoweredBy: showPoweredBy,
+          ),
+        ),
+      ),
+    );
   }
 }

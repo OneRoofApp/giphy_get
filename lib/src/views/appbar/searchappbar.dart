@@ -8,6 +8,7 @@ import 'package:giphy_get/src/l10n/l10n.dart';
 import 'package:giphy_get/src/providers/app_bar_provider.dart';
 import 'package:giphy_get/src/providers/sheet_provider.dart';
 import 'package:giphy_get/src/providers/tab_provider.dart';
+import 'package:giphy_get/src/theme/search_app_bar_style.dart';
 import 'package:provider/provider.dart';
 
 class SearchAppBar extends StatefulWidget {
@@ -78,38 +79,50 @@ class _SearchAppBarState extends State<SearchAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final SearchAppBarStyle? overrideStyle =
+        Theme.of(context).extension<SearchAppBarStyle>();
+
     return Container(
+      color: overrideStyle?.backgroundColor,
       padding: EdgeInsets.only(left: 8, right: 8, bottom: 10),
-      child: _searchWidget(),
+      child: _searchWidget(overrideStyle),
     );
   }
 
-  Widget _searchWidget() {
+  Widget _searchWidget(SearchAppBarStyle? overrideStyle) {
     final l = GiphyGetUILocalizations.labelsOf(context);
+    final prefixIcon = overrideStyle?.prefixIconBuilder != null
+        ? overrideStyle!.prefixIconBuilder!(context)
+        : _searchIcon();
+
     return Column(
       children: [
         _tabProvider.tabType == GiphyType.emoji
-            // ? Container(height: 40.0, child: _giphyLogo())
             ? Container()
             : SizedBox(
-                height: 40,
+                height: overrideStyle?.inputHeight ?? 40,
                 child: Center(
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(
+                        overrideStyle?.borderRadius ?? 10),
                     child: TextField(
                       textAlignVertical: TextAlignVertical.center,
                       autofocus: _sheetProvider.initialExtent ==
                           SheetProvider.maxExtent,
                       focusNode: _focus,
                       controller: _textEditingController,
+                      style: overrideStyle?.inputTextStyle,
+                      cursorColor: overrideStyle?.inputCursorColor,
                       decoration: InputDecoration(
+                        fillColor: overrideStyle?.inputBackgroundColor,
                         filled: true,
-                        prefixIcon: _searchIcon(),
+                        prefixIcon: prefixIcon,
                         hintText: l.searchInputLabel,
+                        hintStyle: overrideStyle?.inputHintStyle,
                         suffixIcon: IconButton(
                             icon: Icon(
                               Icons.clear,
-                              color:
+                              color: overrideStyle?.inputHintStyle?.color ??
                                   Theme.of(context).textTheme.bodyText1!.color!,
                             ),
                             onPressed: () {

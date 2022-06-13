@@ -1,35 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:giphy_get/src/client/models/type.dart';
 
 import 'giphy_tab_detail.dart';
 
 class GiphyTabView extends StatelessWidget {
   final ScrollController scrollController;
   final TabController tabController;
+  final List<String> tabs;
 
-  const GiphyTabView(
-      {Key? key, required this.scrollController, required this.tabController})
-      : super(key: key);
+  const GiphyTabView({
+    Key? key,
+    required this.scrollController,
+    required this.tabController,
+    required this.tabs,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TabBarView(
       controller: tabController,
-      children: [
-        GiphyTabDetail(
-          type: GiphyType.gifs,
-          scrollController: scrollController,
-          key: null,
-        ),
-        GiphyTabDetail(
-          type: GiphyType.stickers,
-          scrollController: scrollController,
-        ),
-        GiphyTabDetail(
-          type: GiphyType.emoji,
-          scrollController: scrollController,
-        )
-      ],
+      children: tabs
+          .map(
+            (type) => GiphyTabDetail(
+              type: type,
+              scrollController: scrollController,
+              key: null,
+            ),
+          )
+          .toList(),
     );
   }
 }
